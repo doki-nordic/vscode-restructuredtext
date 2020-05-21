@@ -26,13 +26,29 @@ def main(argv=None):
     with codecs.open(filepath, 'r', 'utf8') as f:
         page_string = f.read()
 
+    html_inc = ''
+    rst_inc = ''
+    last_dir = '//\\//\\'
+    cur_dir = filepath
+    while last_dir != cur_dir:
+        conf_file = cur_dir + '-doc-inc.html'
+        if os.path.exists(conf_file):
+            with codecs.open(conf_file, 'r', 'utf8') as f:
+                html_inc = f.read()
+        conf_file = cur_dir + '-doc-inc.rst'
+        if os.path.exists(conf_file):
+            with codecs.open(conf_file, 'r', 'utf8') as f:
+                rst_inc = f.read()
+        last_dir = cur_dir
+        cur_dir = os.path.dirname(cur_dir[0:-1]) + '/'
+
     overrides = {
         'initial_header_level': 1,
         'halt_level': 5,
     }
 
     parts = core.publish_parts(
-        source=page_string,
+        source=rst_inc + page_string,
         source_path=filepath,
         writer_name=writer_name,
         settings_overrides=overrides,
@@ -43,7 +59,7 @@ def main(argv=None):
     html_document = html_document.replace('\ufeff', '')
 
     # the REAL print function in python 2, now... see top of file
-    print(html_document)
+    print(html_inc + html_document)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
